@@ -1,0 +1,262 @@
+describe how to build logical agents that can represent information and draw conclusions
+such as those described in the preceding paragraphs.
+7.3 Logic
+This section summarizes the fundamental concepts of logical representation and reasoning.
+These beautiful ideas are independent of any of logic’s particular forms. We therefore
+postpone the technical details of those forms until the next section, using instead the
+familiar example of ordinary arithmetic.
+In Section 7.1
+, we said that knowledge bases consist of sentences. These sentences are
+expressed according to the syntax of the representation language, which specifies all the
+sentences that are well formed. The notion of syntax is clear enough in ordinary arithmetic:
+“
+” is a well-formed sentence, whereas “
+” is not.
+Syntax
+A logic must also define the semantics, or meaning, of sentences. The semantics defines the
+truth of each sentence with respect to each possible world. For example, the semantics for
+arithmetic specifies that the sentence “
+” is true in a world where  is 2 and  is 2, but
+false in a world where  is 1 and  is 1. In standard logics, every sentence must be either true
+or false in each possible world—there is no “in between.”
+2 Fuzzy logic, discussed in Chapter 13
+, allows for degrees of truth.
+Semantics
+Truth
+
+x + y = 4
+x4y+ =
+x + y = 4
+x
+y
+x
+y
+2
+
+Possible world
+When we need to be precise, we use the term model in place of “possible world.” Whereas
+possible worlds might be thought of as (potentially) real environments that the agent might
+or might not be in, models are mathematical abstractions, each of which has a fixed truth
+value (true or false) for every relevant sentence. Informally, we may think of a possible
+world as, for example, having  men and  women sitting at a table playing bridge, and the
+sentence 
+ is true when there are four people in total. Formally, the possible models
+are just all possible assignments of nonnegative integers to the variables  and . Each such
+assignment determines the truth of any sentence of arithmetic whose variables are  and .
+If a sentence  is true in model 
+, we say that 
+ satisfies  or sometimes 
+ is a model of .
+We use the notation 
+ to mean the set of all models of .
+Model
+Satisfaction
+Now that we have a notion of truth, we are ready to talk about logical reasoning. This
+involves the relation of logical entailment between sentences—the idea that a sentence
+follows logically from another sentence. In mathematical notation, we write
+Entailment
+x
+y
+x + y = 4
+x
+y
+x
+y
+α
+m
+m
+α
+m
+α
+M(α)
+α
+α ⊨ β
+to mean that the sentence  entails the sentence . The formal definition of entailment is
+this: 
+ if and only if, in every model in which  is true,  is also true. Using the notation
+just introduced, we can write
+(Note the direction of the  here: if 
+, then  is a stronger assertion than : it rules out
+more possible worlds.) The relation of entailment is familiar from arithmetic; we are happy
+with the idea that the sentence 
+ entails the sentence 
+. Obviously, in any model
+where  is zero, it is the case that 
+ is zero (regardless of the value of ).
+We can apply the same kind of analysis to the wumpus-world reasoning example given in
+the preceding section. Consider the situation in Figure 7.3(b)
+: the agent has detected
+nothing in [1,1] and a breeze in [2,1]. These percepts, combined with the agent’s knowledge
+of the rules of the wumpus world, constitute the KB. The agent is interested in whether the
+adjacent squares [1,2], [2,2], and [3,1] contain pits. Each of the three squares might or might
+not contain a pit, so (ignoring other aspects of the world for now) there are 
+ possible
+models. These eight models are shown in Figure 7.5
+.
+3 Although the figure shows the models as partial wumpus worlds, they are really nothing more than assignments of true and false to
+the sentences “there is a pit in [1,2]” etc. Models, in the mathematical sense, do not need to have ’orrible ’airy wumpuses in them.
+Figure 7.5
+Possible models for the presence of pits in squares [1,2], [2,2], and [3,1]. The KB corresponding to the
+observations of nothing in [1,1] and a breeze in [2,1] is shown by the solid line. (a) Dotted line shows
+models of 
+ (no pit in [1,2]). (b) Dotted line shows models of 
+ (no pit in [2,2]).
+α
+β
+α ⊨ β
+α
+β
+α ⊨ β if and only if M(α) ⊆ M(β) .
+⊆
+α ⊨ β
+α
+β
+x = 0
+xy = 0
+x
+xy
+y
+
+23 = 8
+ 3
+α1
+α2
+The KB can be thought of as a set of sentences or as a single sentence that asserts all the
+individual sentences. The KB is false in models that contradict what the agent knows—for
+example, the KB is false in any model in which [1,2] contains a pit, because there is no
+breeze in [1,1]. There are in fact just three models in which the KB is true, and these are
+shown surrounded by a solid line in Figure 7.5
+. Now let us consider two possible
+conclusions:
+We have surrounded the models of 
+ and 
+ with dotted lines in Figures 7.5(a)
+ and
+7.5(b)
+, respectively. By inspection, we see the following:
+Hence, 
+: there is no pit in [1,2]. We can also see that
+Hence, 
+ does not entail 
+: the agent cannot conclude that there is no pit in [2,2]. (Nor
+can it conclude that there is a pit in [2,2].)
+4 The agent can calculate the probability that there is a pit in [2,2]; Chapter 12
+ shows how.
+The preceding example not only illustrates entailment but also shows how the definition of
+entailment can be applied to derive conclusions—that is, to carry out logical inference. The
+inference algorithm illustrated in Figure 7.5
+ is called model checking, because it
+enumerates all possible models to check that  is true in all models in which 
+ is true, that
+is, that 
+.
+Logical inference
+Model checking
+
+α1 =" There is no pit in [1,2]."
+α2 =" There is no pit in [2,2]."
+α1
+α2
+
+
+in every model in which KB is true, α1 is also true. 
+KB ⊨ α1
+in some models in which KB is true, α2 is false.
+KB
+α2
+4
+
+
+α
+KB
+M(KB) ⊆ M(α)
+In understanding entailment and inference, it might help to think of the set of all
+consequences of 
+ as a haystack and of  as a needle. Entailment is like the needle being
+in the haystack; inference is like finding it. This distinction is embodied in some formal
+notation: if an inference algorithm  can derive  from 
+, we write
+which is pronounced “  is derived from 
+ by ” or “  derives  from 
+.”
+An inference algorithm that derives only entailed sentences is called sound or truth-
+preserving. Soundness is a highly desirable property. An unsound inference procedure
+essentially makes things up as it goes along—it announces the discovery of nonexistent
+needles. It is easy to see that model checking, when it is applicable,
+ is a sound procedure.
+5 Model checking works if the space of models is finite—for example, in
+wumpus worlds of fixed size. For arithmetic, on the other hand, the
+space of models is infinite: even if we restrict ourselves to the integers,
+there are infinitely many pairs of values for  and  in the sentence 
+.
+Sound
+Truth-preserving
+The property of completeness is also desirable: an inference algorithm is complete if it can
+derive any sentence that is entailed. For real haystacks, which are finite in extent, it seems
+obvious that a systematic examination can always decide whether the needle is in the
+haystack. For many knowledge bases, however, the haystack of consequences is infinite, and
+KB
+α
+i
+α
+KB
+KB ⊢i α ,
+α
+KB
+i
+i
+α
+KB
+5 
+x
+y
+x + y = 4
+completeness becomes an important issue.  Fortunately, there are complete inference
+procedures for logics that are sufficiently expressive to handle many knowledge bases.
+6 Compare with the case of infinite search spaces in Chapter 3
+, where depth-first search is not complete.
+Completeness
+We have described a reasoning process whose conclusions are guaranteed to be true in any
+world in which the premises are true; in particular, if KB is true in the real world, then any
+sentence  derived from KB by a sound inference procedure is also true in the real world. So, while
+an inference process operates on “syntax”—internal physical configurations such as bits in
+registers or patterns of electrical blips in brains—the process corresponds to the real-world
+relationship whereby some aspect of the real world is the case by virtue of other aspects of
+the real world being the case.  This correspondence between world and representation is
+illustrated in Figure 7.6
+.
+7 As Wittgenstein (1922) put it in his famous Tractatus: “The world is everything that is the case.”
+Figure 7.6
+Sentences are physical configurations of the agent, and reasoning is a process of constructing new
+physical configurations from old ones. Logical reasoning should ensure that the new configurations
+represent aspects of the world that actually follow from the aspects that the old configurations represent.
+The final issue to consider is grounding—the connection between logical reasoning
+processes and the real environment in which the agent exists. In particular, how do we know
+6
+
+α
+7
+
+that 
+ is true in the real world? (After all, 
+ is just “syntax” inside the agent’s head.) This is
+a philosophical question about which many, many books have been written. (See Chapter
+27
+.) A simple answer is that the agent’s sensors create the connection. For example, our
+wumpus-world agent has a smell sensor. The agent program creates a suitable sentence
+whenever there is a smell. Then, whenever that sentence is in the knowledge base, it is true
+in the real world. Thus, the meaning and truth of percept sentences are defined by the
+processes of sensing and sentence construction that produce them. What about the rest of
+the agent’s knowledge, such as its belief that wumpuses cause smells in adjacent squares?
+This is not a direct representation of a single percept, but a general rule—derived, perhaps,
+from perceptual experience but not identical to a statement of that experience. General rules
+like this are produced by a sentence construction process called learning, which is the
+subject of Part V. Learning is fallible. It could be the case that wumpuses cause smells except
+on February 29 in leap years, which is when they take their baths. Thus, 
+ may not be true
+in the real world, but with good learning procedures, there is reason for optimism.
+Grounding
+KB
+KB
+
+KB

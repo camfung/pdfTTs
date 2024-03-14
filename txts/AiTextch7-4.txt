@@ -1,0 +1,434 @@
+7.4 Propositional Logic: A Very Simple Logic
+We now present propositional logic. We describe its syntax (the structure of sentences) and
+its semantics (the way in which the truth of sentences is determined). From these, we derive
+a simple, syntactic algorithm for logical inference that implements the semantic notion of
+entailment. Everything takes place, of course, in the wumpus world.
+Propositional logic
+7.4.1 Syntax
+The syntax of propositional logic defines the allowable sentences. The atomic sentences
+consist of a single proposition symbol. Each such symbol stands for a proposition that can
+be true or false. We use symbols that start with an uppercase letter and may contain other
+letters or subscripts, for example: 
+, 
+, 
+, 
+, and FacingEast. The names are arbitrary but
+are often chosen to have some mnemonic value—we use 
+ to stand for the proposition
+that the wumpus is in [1,3]. (Remember that symbols such as 
+ are atomic, i.e., 
+, 1, and
+3 are not meaningful parts of the symbol.) There are two proposition symbols with fixed
+meanings: True is the always-true proposition and False is the always-false proposition.
+Complex sentences are constructed from simpler sentences, using parentheses and
+operators called logical connectives. There are five connectives in common use:
+Atomic sentences
+Proposition symbol
+P Q R W1,3
+W1,3
+W1,3
+W
+Complex sentences
+Logical connectives
+ (not). A sentence such as 
+ is called the negation of 
+. A literal is either an atomic
+sentence (a positive literal) or a negated atomic sentence (a negative literal).
+Negation
+Literal
+ (and). A sentence whose main connective is , such as 
+, is called a conjunction;
+its parts are the conjuncts. (The  looks like an “A” for “And.”)
+Conjunction
+ (or). A sentence whose main connective is , such as 
+, is a disjunction;
+its parts are disjuncts—in this example, 
+ and 
+.
+Disjunction
+¬
+¬W1,3
+W1,3
+∧
+∧
+W1,3 ∧ P3,1
+∧
+∨
+∨
+(W1,3 ∧ P3,1) ∨ W2,2
+(W1,3 ∧ P3,1)
+W2,2
+ (implies). A sentence such as 
+ is called an implication (or
+conditional). Its premise or antecedent is 
+, and its conclusion or consequent is 
+. Implications are also known as rules or if–then statements. The implication symbol
+is sometimes written in other books as 
+ or 
+.
+Implication
+Premise
+Conclusion
+Rules
+ (if and only if). The sentence 
+ is a biconditional.
+Biconditional
+Figure 7.7
+ gives a formal grammar of propositional logic. (BNF notation is explained on
+page 1030.) The BNF grammar is augmented with an operator precedence list to remove
+ambiguity when multiple operators are used. The “not” operator 
+ has the highest
+precedence, which means that in the sentence 
+ the  binds most tightly, giving us
+the equivalent of 
+ rather than 
+. (The notation for ordinary arithmetic is the
+⇒
+(W1,3 ∧ P3,1) ⇒ ¬W2,2
+(W1,3 ∧ P3,1)
+¬W2,2
+⊃
+→
+⇔
+W1,3 ⇔ ¬W2,2
+
+(¬)
+¬A ∧ B
+¬
+(¬A) ∧ B
+¬(A ∧ B)
+same: 
+ is 2, not –6.) When appropriate, we also use parentheses and square brackets
+to clarify the intended sentence structure and improve readability.
+Figure 7.7
+A BNF (Backus–Naur Form) grammar of sentences in propositional logic, along with operator
+precedences, from highest to lowest.
+7.4.2 Semantics
+Having specified the syntax of propositional logic, we now specify its semantics. The
+semantics defines the rules for determining the truth of a sentence with respect to a
+particular model. In propositional logic, a model simply sets the truth value—true or false—
+for every proposition symbol. For example, if the sentences in the knowledge base make use
+of the proposition symbols 
+, and 
+, then one possible model is
+Truth value
+−2 + 4
+P1,2, P2,2
+P3,1
+m1 = {P1,2 = false, P2,2 = false, P3,1 = true} .
+With three proposition symbols, there are 
+ possible models—exactly those depicted in
+Figure 7.5
+. Notice, however, that the models are purely mathematical objects with no
+necessary connection to wumpus worlds. 
+ is just a symbol; it might mean “there is a pit
+in [1,2]” or “I’m in Paris today and tomorrow.”
+The semantics for propositional logic must specify how to compute the truth value of any
+sentence, given a model. This is done recursively. All sentences are constructed from atomic
+sentences and the five connectives; therefore, we need to specify how to compute the truth
+of atomic sentences and how to compute the truth of sentences formed with each of the five
+connectives. Atomic sentences are easy:
+True is true in every model and False is false in every model.
+The truth value of every other proposition symbol must be specified directly in the
+model. For example, in the model 
+ given earlier, 
+ is false.
+For complex sentences, we have five rules, which hold for any subsentences 
+ and 
+(atomic or complex) in any model 
+ (here “iff” means “if and only if”):
+ is true iff 
+ is false in 
+.
+ is true iff both 
+ and 
+ are true in 
+.
+ is true iff either 
+ or 
+ is true in 
+.
+ is true unless 
+ is true and 
+ is false in 
+.
+ is true iff 
+ and 
+ are both true or both false in 
+.
+The rules can also be expressed with truth tables that specify the truth value of a complex
+sentence for each possible assignment of truth values to its components. Truth tables for the
+five connectives are given in Figure 7.8
+. From these tables, the truth value of any sentence 
+ can be computed with respect to any model 
+ by a simple recursive evaluation. For
+example, the sentence 
+, evaluated in 
+, gives 
+. Exercise 7.TRUV asks you to write the algorithm
+PL-TRUE?
+ which computes the truth value of a propositional logic sentence  in a
+model 
+.
+Figure 7.8
+23 = 8
+
+P1,2
+m1
+P1,2
+P
+Q
+m
+¬P
+P
+m
+P ∧ Q
+P
+Q
+m
+P ∨ Q
+P
+Q
+m
+P ⇒ Q
+P
+Q
+m
+P ⇔ Q
+P
+Q
+m
+
+s
+m
+¬P1,2 ∧ (P2,2 ∨ P3,1)
+m1
+true ∧ (false ∨ true) = true ∧ true = true
+(s, m),
+s
+m
+Truth tables for the five logical connectives. To use the table to compute, for example, the value of 
+when 
+ is true and 
+ is false, first look on the left for the row where 
+ is true and 
+ is false (the third
+row). Then look in that row under the 
+ column to see the result: true.
+Truth table
+The truth tables for “and,” “or,” and “not” are in close accord with our intuitions about the
+English words. The main point of possible confusion is that 
+ is true when 
+ is true or 
+ is true or both. A different connective, called “exclusive or” (“xor” for short), yields false
+when both disjuncts are true.  There is no consensus on the symbol for exclusive or; some
+choices are  or 
+ or 
+.
+8 Latin uses two separate words: “vel” is inclusive or and “aut” is exclusive or.
+The truth table for 
+ may not quite fit one’s intuitive understanding of “
+ implies 
+” or “if 
+ then 
+.” For one thing, propositional logic does not require any relation of causation or
+relevance between 
+ and 
+. The sentence “5 is odd implies Tokyo is the capital of Japan” is a
+true sentence of propositional logic (under the normal interpretation), even though it is a
+decidedly odd sentence of English. Another point of confusion is that any implication is true
+whenever its antecedent is false. For example, “5 is even implies Sam is smart” is true,
+regardless of whether Sam is smart. This seems bizarre, but it makes sense if you think of “
+” as saying, “If 
+ is true, then I am claiming that 
+ is true; otherwise I am making no
+claim.” The only way for this sentence to be false is if 
+ is true but 
+ is false.
+The biconditional, 
+, is true whenever both 
+ and 
+ are true. In English,
+this is often written as “
+ if and only if 
+.” Many of the rules of the wumpus world are best
+written using 
+. For example, a square is breezy if a neighboring square has a pit, and a
+square is breezy only if a neighboring square has a pit. So we need a biconditional,
+P ∨ Q
+P
+Q
+P
+Q
+P ∨ Q
+P ∨ Q
+P
+Q
+8
+.
+∨
+≠
+⊕
+⇒
+P
+Q
+P
+Q
+P
+Q
+P ⇒ Q
+P
+Q
+P
+Q
+P ⇔ Q
+P ⇒ Q
+Q ⇒ P
+P
+Q
+⇔
+where 
+ means that there is a breeze in [1,1].
+7.4.3 A simple knowledge base
+Now that we have defined the semantics for propositional logic, we can construct a
+knowledge base for the wumpus world. We focus first on the immutable aspects of the
+wumpus world, leaving the mutable aspects for a later section. For now, we need the
+following symbols for each 
+ location:
+ is true if there is a pit in 
+.
+ is true if there is a wumpus in 
+, dead or alive.
+ is true if there is a breeze in 
+.
+ is true if there is a stench in 
+.
+ is true if the agent is in location 
+.
+The sentences we write will suffice to derive 
+ (there is no pit in [1,2]), as was done
+informally in Section 7.3
+. We label each sentence 
+ so that we can refer to them:
+There is no pit in [1,1]:
+A square is breezy if and only if there is a pit in a neighboring square. This has to be
+stated for each square; for now, we include just the relevant squares:
+The preceding sentences are true in all wumpus worlds. Now we include the breeze
+percepts for the first two squares visited in the specific world the agent is in, leading up
+to the situation in Figure 7.3(b)
+.
+B1,1 ⇔ (P1,2 ∨ P2,1) ,
+B1,1
+[x,y]
+Px,y
+[x,y]
+Wx,y
+[x,y]
+Bx,y
+[x,y]
+Sx,y
+[x,y]
+Lx,y
+[x,y]
+¬P1,2
+
+Ri
+R1 :
+¬P1,1 .
+R2 :
+B1,1 ⇔ (P1,2 ∨ P2,1) .
+R3 :
+B2,1 ⇔ (P1,1 ∨ P2,2 ∨ P3,1) .
+
+7.4.4 A simple inference procedure
+Our goal now is to decide whether 
+ for some sentence . For example, is 
+entailed by our 
+? Our first algorithm for inference is a model-checking approach that is a
+direct implementation of the definition of entailment: enumerate the models, and check that
+ is true in every model in which 
+ is true. Models are assignments of true or false to
+every proposition symbol. Returning to our wumpus-world example, the relevant
+proposition symbols are 
+, 
+, 
+, 
+, 
+, 
+, and 
+. With seven symbols, there
+are 
+ possible models; in three of these, 
+ is true (Figure 7.9
+). In those three
+models, 
+ is true, hence there is no pit in [1,2]. On the other hand, 
+ is true in two of
+the three models and false in one, so we cannot yet tell whether there is a pit in [2,2].
+Figure 7.9
+A truth table constructed for the knowledge base given in the text. 
+ is true if 
+ through 
+ are true,
+which occurs in just 3 of the 128 rows (the ones underlined in the right-hand column). In all 3 rows, 
+is false, so there is no pit in [1,2]. On the other hand, there might (or might not) be a pit in [2,2].
+Figure 7.9
+ reproduces in a more precise form the reasoning illustrated in Figure 7.5
+. A
+general algorithm for deciding entailment in propositional logic is shown in Figure 7.10
+.
+Like the BACKTRACKING-SEARCH algorithm on page 192, TT-ENTAILS? performs a recursive
+enumeration of a finite space of assignments to symbols. The algorithm is sound because it
+implements directly the definition of entailment, and complete because it works for any 
+and  and always terminates—there are only finitely many models to examine.
+R4 :
+¬B1,1 .
+R5 :
+B2,1 .
+KB ⊨ α
+α
+¬P1,2
+KB
+α
+KB
+B1,1 B2,1 P1,1 P1,2 P2,1 P2,2
+P3,1
+27 = 128
+KB
+
+¬P1,2
+P2,2
+KB
+R1
+R5
+P1,2
+
+
+
+KB
+α
+Figure 7.10
+A truth-table enumeration algorithm for deciding propositional entailment. (TT stands for truth table.)
+PL-TRUE? returns true if a sentence holds within a model. The variable model represents a partial model—
+an assignment to some of the symbols. The keyword and here is an infix function symbol in the
+pseudocode programming language, not an operator in proposition logic; it takes two arguments and
+returns true or false.
+Of course, “finitely many” is not always the same as “few.” If 
+ and  contain  symbols in
+all, then there are 
+ models. Thus, the time complexity of the algorithm is 
+. (The
+space complexity is only 
+ because the enumeration is depth-first.) Later in this chapter
+we show algorithms that are much more efficient in many cases. Unfortunately,
+propositional entailment is co-NP-complete (i.e., probably no easier than NP-complete—see
+Appendix A
+), so every known inference algorithm for propositional logic has a worst-case
+complexity that is exponential in the size of the input.
+KB
+α
+n
+2n
+O(2n)
+O(n)
+
