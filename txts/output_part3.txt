@@ -1,1 +1,0 @@
-itself. These mechanisms, which are discussed in Chapter 19 , create general knowledge about the environment from a series of percepts. A learning agent can be fully autonomous. 

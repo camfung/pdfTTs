@@ -15,7 +15,7 @@
             "name": "App",
             "type": "debugpy",
             "request": "launch",
-            "program": "app2.py",
+            "program": "app.py",
             "console": "externalTerminal"
         }
     ]
