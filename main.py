@@ -9,7 +9,7 @@ from pydub import AudioSegment
 load_dotenv()
 
 
-def split_pdf(pdf_path, from_page, to_page):
+def split_pdf(pdf_path, from_page=0, to_page=0):
     """
     Splits a PDF file, creating a new PDF file from a specified range of pages.
 
@@ -33,6 +33,8 @@ def split_pdf(pdf_path, from_page, to_page):
     The `fitz` module, part of PyMuPDF, is used for handling PDF operations.
     """
     try:
+        if from_page is None and to_page is None:
+            return pdf_path
         doc = fitz.open(pdf_path)
         split_doc = fitz.open()
         split_doc.insert_pdf(doc, from_page=from_page, to_page=to_page)

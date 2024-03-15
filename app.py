@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 import threading
 import tkinter as tk
-from tkinter import PhotoImage, ttk, filedialog
+from tkinter import IntVar, PhotoImage, ttk, filedialog
 from playsound import playsound
 
 from main import gen_audio, get_price
@@ -17,7 +17,7 @@ class PDFtoMP3Converter:
 
     def _configure_root(self):
         self.root.title("PDF to MP3 Converter")
-        self.root.geometry("585x400")
+        self.root.geometry("450x440")
         # self.root.resizable(False, False)
         self.root.tk.call("source", "Azure-ttk-theme/azure.tcl")
         self.root.tk.call("set_theme", "dark")
@@ -51,6 +51,11 @@ class PDFtoMP3Converter:
         play_sound_button = ttk.Button(
             self.root,  command=self._play, text="Sample")
 
+        self.CheckVar = IntVar(value=0)
+        entire_pdf_checkbox_label = ttk.Label(self.root, text="Entire PDF:")
+        entire_pdf_checkbox = ttk.Checkbutton(
+            self.root, command=self._toggle_entire_pdf, variable=self.CheckVar)
+
         start_page_label = ttk.Label(
             self.root, text="Starting page (inclusive):")
         self.start_page_entry = ttk.Entry(self.root, validate="key", validatecommand=(
@@ -83,17 +88,21 @@ class PDFtoMP3Converter:
             row=4, column=0, padx=10, pady=5, sticky="w")
         play_sound_button.grid(row=4, column=1, padx=10, sticky="e")
 
-        start_page_label.grid(row=5, column=0, padx=10, pady=5, sticky="w")
-        self.start_page_entry.grid(row=5, column=1, padx=10, pady=5)
+        entire_pdf_checkbox_label.grid(
+            row=5, column=0, padx=10, pady=5, sticky="w")
+        entire_pdf_checkbox.grid(row=5, column=1, padx=10, pady=5, sticky="e")
 
-        end_page_label.grid(row=6, column=0, padx=10, pady=5, sticky="w")
-        self.end_page_entry.grid(row=6, column=1, padx=10, pady=5)
+        start_page_label.grid(row=6, column=0, padx=10, pady=5, sticky="w")
+        self.start_page_entry.grid(row=6, column=1, padx=10, pady=5)
 
-        output_file_label.grid(row=7, column=0, padx=10, pady=5, sticky="w")
-        self.output_file_entry.grid(row=7, column=1, padx=10, pady=5)
+        end_page_label.grid(row=7, column=0, padx=10, pady=5, sticky="w")
+        self.end_page_entry.grid(row=7, column=1, padx=10, pady=5)
 
-        estimate_price_button.grid(row=8, column=0, padx=10, pady=10)
-        generate_button.grid(row=8, column=1, columnspan=2, padx=10, pady=10)
+        output_file_label.grid(row=8, column=0, padx=10, pady=5, sticky="w")
+        self.output_file_entry.grid(row=8, column=1, padx=10, pady=5)
+
+        estimate_price_button.grid(row=9, column=0, padx=10, pady=10)
+        generate_button.grid(row=9, column=1, columnspan=2, padx=10, pady=10)
 
     def display_message(self, message):
         # Create a new window
@@ -147,6 +156,20 @@ class PDFtoMP3Converter:
     def _validate_positive_integer(self, P):
         return str.isdigit(P) or P == ""
 
+    def _toggle_entire_pdf(self):
+        # Check if the checkbox is selected or not
+        self.CheckVar.set(1 if self.CheckVar.get() == 0 else 0)
+        if self.CheckVar.get() == 1:
+            # Enable the entries
+            self.start_page_entry.config(state='normal')
+            self.end_page_entry.config(state='normal')
+        else:
+            # Disable the entries and set their values to '0'
+            self.start_page_entry.config(state='disabled')
+            self.end_page_entry.config(state='disabled')
+            self.start_page_entry.delete(0, 'end')
+            self.end_page_entry.delete(0, 'end')
+
     def _generate(self):
         form_values = {
             "pdf_file_path": self.file_label_text.get(),
@@ -157,8 +180,10 @@ class PDFtoMP3Converter:
             "output_file_name": self.output_file_entry.get(),
         }
         try:
-            file = gen_audio(self.full_file_path, self.full_folder_path, form_values["output_file_name"], int(
-                form_values["start_page"]), int(form_values["end_page"]))
+            from_page, to_page = (int(form_values["start_page"]), int(
+                form_values["end_page"])) if not self.CheckVar.get() == 1 else (0, 0)
+            file = gen_audio(
+                self.full_file_path, self.full_folder_path, form_values["output_file_name"], from_page, to_page)
             self.display_message(f"Generated audio saved to {file}")
         except Exception as e:
             self.display_message(f"Failed to generate audio: {e}")
@@ -172,8 +197,9 @@ class PDFtoMP3Converter:
             "end_page": self.end_page_entry.get(),
             "output_file_name": self.output_file_entry.get(),
         }
-        total_price_cents = get_price(self.full_file_path, int(
-            form_values["start_page"]), int(form_values["end_page"]))
+        from_page, to_page = (int(form_values["start_page"]), int(
+            form_values["end_page"])) if not self.CheckVar.get() == 1 else (0, 0)
+        total_price_cents = get_price(self.full_file_path, from_page, to_page)
         total_price_dollars = total_price_cents / 100
 
         self.display_message(
