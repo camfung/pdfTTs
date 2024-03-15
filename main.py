@@ -37,7 +37,7 @@ def split_pdf(pdf_path, from_page, to_page):
         split_doc = fitz.open()
         split_doc.insert_pdf(doc, from_page=from_page, to_page=to_page)
 
-        output_path = "pdfs/temppdf.pdf"
+        output_path = "pdfs/temp_split_pdf.pdf"
         split_doc.save(output_path)
         return output_path
     except Exception as e:
@@ -192,5 +192,43 @@ def gen_audio(pdf_path, output_mp3_path, output_file_name, pdf_from, pdf_to):
         output_file_path = f"{output_mp3_path}/{output_file_name}.mp3"
         stitch_mp3_files(mp3_files, output_file_path)
         return output_file_path
+    except Exception as e:
+        raise e
+
+
+def calculate_price_from_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            content = file.read()
+            num_characters = len(content)
+            price_cents = (num_characters / 1000000) * 1500
+            return price_cents
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+def get_price(pdf_path, pdf_from, pdf_to):
+    """
+    Main function to convert a PDF file to an MP3 file.
+
+    Args:
+    - pdf_path (str): Path to the input PDF file.
+    - output_mp3_path (str): Path where the output MP3 file will be saved.
+    """
+    try:
+        # split pdf by page
+        split_pdf_file_path = split_pdf(pdf_path, pdf_from, pdf_to)
+        # Convert PDF to text
+        txt_path = split_pdf_file_path.replace('.pdf', '.txt')
+        pdf_to_text(split_pdf_file_path, txt_path)
+
+        # Split the text file into chunks
+        chunk_files = split_text_file_into_chunks(txt_path)
+        total_price = 0
+        for file in chunk_files:
+            with open(file, 'r') as f:
+                total_price += calculate_price_from_file(file)
+
+        return total_price
     except Exception as e:
         raise e

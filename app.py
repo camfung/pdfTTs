@@ -5,7 +5,7 @@ import tkinter as tk
 from tkinter import PhotoImage, ttk, filedialog
 from playsound import playsound
 
-from main import gen_audio
+from main import gen_audio, get_price
 
 
 class PDFtoMP3Converter:
@@ -64,6 +64,8 @@ class PDFtoMP3Converter:
             self.root, text="Output MP3 file name (no file ext):")
         self.output_file_entry = ttk.Entry(self.root)
 
+        estimate_price_button = ttk.Button(
+            self.root, text="Estimate Price", command=self._estimate_price)
         generate_button = ttk.Button(
             self.root, text="Generate", command=self._generate)
 
@@ -90,7 +92,8 @@ class PDFtoMP3Converter:
         output_file_label.grid(row=7, column=0, padx=10, pady=5, sticky="w")
         self.output_file_entry.grid(row=7, column=1, padx=10, pady=5)
 
-        generate_button.grid(row=8, column=0, columnspan=2, padx=10, pady=10)
+        estimate_price_button.grid(row=8, column=0, padx=10, pady=10)
+        generate_button.grid(row=8, column=1, columnspan=2, padx=10, pady=10)
 
     def display_message(self, message):
         # Create a new window
@@ -160,15 +163,21 @@ class PDFtoMP3Converter:
         except Exception as e:
             self.display_message(f"Failed to generate audio: {e}")
 
-    def calculate_price_from_file(self, file_path):
-        try:
-            with open(file_path, 'r', encoding='utf-8') as file:
-                content = file.read()
-                num_characters = len(content)
-                price_cents = (num_characters / 1000000) * 1500
-                return {"success": True, "num_characters": num_characters, "price_cents": price_cents}
-        except Exception as e:
-            return {"success": False, "error": str(e)}
+    def _estimate_price(self):
+        form_values = {
+            "pdf_file_path": self.file_label_text.get(),
+            "folder_path": self.folder_label_text.get(),
+            "voice_selection": self.options_var.get(),
+            "start_page": self.start_page_entry.get(),
+            "end_page": self.end_page_entry.get(),
+            "output_file_name": self.output_file_entry.get(),
+        }
+        total_price_cents = get_price(self.full_file_path, int(
+            form_values["start_page"]), int(form_values["end_page"]))
+        total_price_dollars = total_price_cents / 100
+
+        self.display_message(
+            f"Price estimate: ${f'{total_price_dollars:.5f}' if total_price_dollars < 1 else f'{total_price_dollars:.2f}'}")
 
 
 app = PDFtoMP3Converter()

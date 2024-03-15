@@ -15,7 +15,8 @@ To use this tool, follow these steps:
 1. Ensure that Python is installed on your system.
 2. Install the required Python packages by running `pip install -r requirements.txt`.
 3. Place the PDF document you wish to convert in an accessible directory.
-4. Execute the script via the command line with the syntax: `python script.py <pdf_path> <output_mp3_path>`, where `<pdf_path>` is the path to the input PDF file and `<output_mp3_path>` is the path where the output MP3 file will be saved.
+4. Add your open ai api key into the .env file
+5. Run the program follow the GUI 
 
 ## Limitations
 - **Language and Voice:** The current implementation uses a single voice model. Variations in language or accent preferences are not supported.
